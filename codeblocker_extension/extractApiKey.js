@@ -70,7 +70,6 @@ async function extractApiKey() {
         for (let i = 0; i < cleanLength; i++) {
           newPng.data[i] = 32; // ASCII for space character (whitespace)
         }
-
         // Now embed the new key, padded with whitespace
         // @ts-ignore
         const paddedKey = updatedKey.padEnd(parseInt(keyLength), " ");
