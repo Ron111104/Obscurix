@@ -184,11 +184,10 @@ def filter_text_updated(text, mode="strict"):
 
     softened_text = text.replace("hate", "dislike").replace("angry", "frustrated")
 
-    creative_variations = []
-    for i in range(2):
-        model = genai.GenerativeModel('gemini-2.0-flash-lite')
-        response = model.generate_content(f"Generate a toned down variation of the text but dont let go of the context also if you encounter a name u can replace it with a different name and also redact all the private info such as phone numbers,bank details,passwords,pins,api keys,card details and all: {original_text}. Make sure you give only the sentence not anything else. ").text.strip()
-        creative_variations.append(response)
+    # for i in range(2):
+    #     model = genai.GenerativeModel('gemini-2.0-flash-lite')
+    #     response = model.generate_content(f"Generate a toned down variation of the text but dont let go of the context also if you encounter a name u can replace it with a different name and also redact all the private info such as phone numbers,bank details,passwords,pins,api keys,card details and all: {original_text}. Make sure you give only the sentence not anything else. ").text.strip()
+    #     creative_variations.append(response)
 
     # Return based on mode
     if mode == "strict":
@@ -199,6 +198,10 @@ def filter_text_updated(text, mode="strict"):
         # res.append(response)
         return res
     elif mode == "creative":
+        creative_variations = []
+        model = genai.GenerativeModel('gemini-2.0-flash-lite')
+        response = model.generate_content(f"Generate a toned down variation of the text and remove all personal info such asas phone numbers,bank details,passwords,pins,api keys,card details but dont let go of the context: {original_text}.Please only give the output of the transformed sentence and not anything else.").text.strip()
+        creative_variations.append(response)
         return creative_variations
     else:
         return [text]
@@ -224,56 +227,56 @@ def codetransform(text):
 #         for output in outputs:
 #             print(f"- {output}")
 
-if __name__ == "__main__":
-    clf = load_classifier()
+# if __name__ == "__main__":
+#     clf = load_classifier()
 
-    input_texts = ["""My password: abc@1234 and my api_key=sk_test_51LJ93c98C3D.
-                        My bank account is 123456789012. My card is 4111111111111111 and PIN is 1234.
-                        Call me at 9876543210 or email me at test.user@example.com.
-                        My name is John Doe, and I work in New York at OpenAI.""",
-                     "def quicksort(arr): if len(arr) <= 1: return arr",
-                     """import re
-                        import io
-                        import fasttext
-                        from PIL import Image
-                        from numpy import ndarray
-                        from apple_ocr.ocr import OCR
-                        from flask import Flask, request, jsonify
-                        from typing import Tuple, List, Dict, Union
-                        from huggingface_hub import hf_hub_download
+#     input_texts = ["""My password: abc@1234 and my api_key=sk_test_51LJ93c98C3D.
+#                         My bank account is 123456789012. My card is 4111111111111111 and PIN is 1234.
+#                         Call me at 9876543210 or email me at test.user@example.com.
+#                         My name is John Doe, and I work in New York at OpenAI.""",
+#                      "def quicksort(arr): if len(arr) <= 1: return arr",
+#                      """import re
+#                         import io
+#                         import fasttext
+#                         from PIL import Image
+#                         from numpy import ndarray
+#                         from apple_ocr.ocr import OCR
+#                         from flask import Flask, request, jsonify
+#                         from typing import Tuple, List, Dict, Union
+#                         from huggingface_hub import hf_hub_download
 
-                        app = Flask(_name_)
+#                         app = Flask(_name_)
 
-                        model = fasttext.load_model(hf_hub_download(
-                            "kenhktsui/code-natural-language-fasttext-classifier", "model_quantized.bin"))
+#                         model = fasttext.load_model(hf_hub_download(
+#                             "kenhktsui/code-natural-language-fasttext-classifier", "model_quantized.bin"))
 
-                        def replace_newlines(text: str) -> str:
-                            return re.sub("\n+", " ", text)
+#                         def replace_newlines(text: str) -> str:
+#                             return re.sub("\n+", " ", text)
 
-                        def parse_labels_probs(
-                            data: Tuple[List[List[str]], List[ndarray]],
-                            remove_prefix: str = '_label_'
-                        ) -> Dict[str, Union[List[Dict[str, float]], Dict[str, float]]]:
-                            labels, probs = data
+#                         def parse_labels_probs(
+#                             data: Tuple[List[List[str]], List[ndarray]],
+#                             remove_prefix: str = '_label_'
+#                         ) -> Dict[str, Union[List[Dict[str, float]], Dict[str, float]]]:
+#                             labels, probs = data
 
-                            parsed_dict = {
-                                label[0].replace(remove_prefix, ''): float(prob[0])
-                                for label, prob in zip(labels, probs)
-                            }
+#                             parsed_dict = {
+#                                 label[0].replace(remove_prefix, ''): float(prob[0])
+#                                 for label, prob in zip(labels, probs)
+#                             }
 
-                            return {
-                                'dict': parsed_dict
-                            }""",]
+#                             return {
+#                                 'dict': parsed_dict
+#                             }""",]
     
-    for text in input_texts:
-        is_code = is_code_transformer(text, clf, threshold=0.85)
-        if is_code:
-            print(codetransform(text))
-        else:
-            filtered_outputs = filter_text_updated(text, mode="strict")
-            print("Filtered Outputs:")
-            for output in filtered_outputs:
-                print(f"- {output}")
+#     for text in input_texts:
+#         is_code = is_code_transformer(text, clf, threshold=0.85)
+#         if is_code:
+#             print(codetransform(text))
+#         else:
+#             filtered_outputs = filter_text_updated(text, mode="strict")
+#             print("Filtered Outputs:")
+#             for output in filtered_outputs:
+#                 print(f"- {output}")
     
 
     
