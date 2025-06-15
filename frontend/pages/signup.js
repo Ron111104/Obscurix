@@ -54,7 +54,8 @@ export default function Signup() {
       const data = await res.json();
 
       if (res.ok) {
-        // Store user data in memory instead of localStorage/sessionStorage
+        // Store user data in localStorage after successful signup
+        localStorage.setItem("user", JSON.stringify(data.user));
         window.location.href = "/";
       } else {
         alert(data.message || "Signup failed");
