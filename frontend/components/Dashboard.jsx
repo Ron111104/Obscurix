@@ -6,30 +6,31 @@ import {
   ChevronUp,
   CheckCircle,
   XCircle,
-  Usb,
+  UserCircle,
 } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import { motion, AnimatePresence } from "framer-motion";
+import { useRouter } from "next/navigation";
 
 export default function DashboardPage() {
   const [userStats, setUserStats] = useState([]);
   const [openIndex, setOpenIndex] = useState(null);
-  const [viewMode, setViewMode] = useState("activity");
   const canvasRef = useRef(null);
+  const router = useRouter();
 
-  const getStatusIcon = (status) =>
-    status ? (
-      <CheckCircle className="w-4 h-4 text-green-400" />
-    ) : (
-      <XCircle className="w-4 h-4 text-red-500" />
-    );
+  useEffect(() => {
+    const storedUser = localStorage.getItem("user");
+    if (!storedUser) {
+      router.push("/login");
+    }
+  }, [router]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
     const ctx = canvas.getContext("2d");
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
-    const letters = "アァイィウヴエエェオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモラリルレロワン";
+    const letters = "アァイィウヴエエェオカキクケコサシスセソ...";
     const fontSize = 14;
     const columns = canvas.width / fontSize;
     const drops = Array.from({ length: columns }).fill(1);
@@ -55,26 +56,88 @@ export default function DashboardPage() {
   useEffect(() => {
     setUserStats([
       {
-        username: "Faiz Abid",
-        attempts: 5,
-        warnedAttempts: 2,
-        score: 87,
+        username: "Syed Omar Albeez",
+        attempts: 12,
+        warnedAttempts: 3,
+        score: 90,
         flagged: false,
         timestamp: new Date().toISOString(),
       },
       {
-        username: "Syed Omar",
-        attempts: 10,
-        warnedAttempts: 5,
-        score: 62,
+        username: "Ronak Chordia",
+        attempts: 5,
+        warnedAttempts: 1,
+        score: 31,
+        flagged: true,
+        timestamp: new Date().toISOString(),
+      },
+      {
+        username: "Mohamed Nabeel",
+        attempts: 9,
+        warnedAttempts: 2,
+        score: 78,
+        flagged: false,
+        timestamp: new Date().toISOString(),
+      },
+      {
+        username: "Faiz Abid",
+        attempts: 14,
+        warnedAttempts: 6,
+        score: 45,
+        flagged: true,
+        timestamp: new Date().toISOString(),
+      },
+      {
+        username: "Rohan Kumar",
+        attempts: 7,
+        warnedAttempts: 0,
+        score: 85,
+        flagged: false,
+        timestamp: new Date().toISOString(),
+      },
+      {
+        username: "Kecil C",
+        attempts: 11,
+        warnedAttempts: 4,
+        score: 29,
         flagged: true,
         timestamp: new Date().toISOString(),
       },
     ]);
   }, []);
-
+  
   const toggleAccordion = (index) => {
-    setOpenIndex(openIndex === index ? null : index);
+    setOpenIndex((prev) => (prev === index ? null : index));
+  };
+
+  const getStatusBadge = (flagged) =>
+    flagged ? (
+      <span className="flex items-center gap-1 text-sm font-semibold px-2 py-1 bg-red-600/20 text-red-400 rounded-full">
+        <XCircle className="w-4 h-4" /> Flagged
+      </span>
+    ) : (
+      <span className="flex items-center gap-1 text-sm font-semibold px-2 py-1 bg-green-600/20 text-green-400 rounded-full">
+        <CheckCircle className="w-4 h-4" /> Safe
+      </span>
+    );
+
+  const getScoreBadge = (score) => {
+    let bg, text;
+    if (score >= 75) {
+      bg = "bg-green-700/30";
+      text = "text-green-300";
+    } else if (score >= 50) {
+      bg = "bg-yellow-700/30";
+      text = "text-yellow-300";
+    } else {
+      bg = "bg-red-700/30";
+      text = "text-red-300";
+    }
+    return (
+      <span className={`text-sm font-semibold px-2 py-1 rounded-full ${bg} ${text}`}>
+        Score: {score}
+      </span>
+    );
   };
 
   return (
@@ -82,46 +145,43 @@ export default function DashboardPage() {
       <Navbar />
       <div className="relative">
         <canvas ref={canvasRef} className="fixed top-0 left-0 w-full h-full -z-10" />
+
         <motion.main
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
-          className="min-h-screen text-white px-6 py-20 font-geist"
+          className="min-h-screen px-6 py-20 text-white font-geist relative z-10"
         >
-          <h1 className="text-4xl font-bold text-center text-[#a855f7] mb-10 mt-4 font-pg drop-shadow">
+          <h1 className="text-4xl font-bold text-center text-[#a855f7] mb-12 font-pg drop-shadow">
             Admin Dashboard
           </h1>
-          <div className="space-y-6">
+
+          <div className="flex flex-col gap-6">
             {userStats.map((user, idx) => (
-              <div key={idx} className="rounded-lg border border-[#3b3b3b] bg-[#1a1a1a]">
+              <div
+                key={idx}
+                className="rounded-xl border border-[#2c2c2c] bg-[#181818] hover:shadow-lg transition-shadow"
+              >
                 <button
                   onClick={() => toggleAccordion(idx)}
-                  className="w-full flex justify-between items-center px-6 py-4"
+                  className="w-full flex justify-between items-center px-6 py-5"
                 >
-                  <div>
-                    <p className="text-lg font-bold font-pg">{user.username}</p>
-                    <p className="text-sm text-gray-400">
-                      {new Date(user.timestamp).toLocaleString()}
-                    </p>
-                  </div>
                   <div className="flex items-center gap-4">
-                    <div className="flex items-center gap-1">
-                      {getStatusIcon(user.flagged)} Flagged
+                    <UserCircle className="w-9 h-9 text-[#b183f5]" />
+                    <div>
+                      <p className="text-lg font-semibold">{user.username}</p>
+                      <p className="text-xs text-gray-400">
+                        {new Date(user.timestamp).toLocaleString()}
+                      </p>
                     </div>
-                    <span
-                      className={`text-sm font-semibold px-2 py-1 rounded-full ${
-                        user.score >= 75
-                          ? "bg-green-600"
-                          : user.score >= 50
-                          ? "bg-yellow-600"
-                          : "bg-red-600"
-                      }`}
-                    >
-                      Score: {user.score}
-                    </span>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    {getStatusBadge(user.flagged)}
+                    {getScoreBadge(user.score)}
                     {openIndex === idx ? <ChevronUp /> : <ChevronDown />}
                   </div>
                 </button>
+
                 <AnimatePresence>
                   {openIndex === idx && (
                     <motion.div
@@ -129,12 +189,30 @@ export default function DashboardPage() {
                       animate={{ height: "auto", opacity: 1 }}
                       exit={{ height: 0, opacity: 0 }}
                       transition={{ duration: 0.3 }}
-                      className="px-6 py-4 bg-[#0f0f0f] text-sm text-gray-300"
+                      className="px-6 pb-5 text-sm text-gray-300 overflow-hidden"
                     >
-                      <p>Attempts: {user.attempts}</p>
-                      <p>Warned Attempts: {user.warnedAttempts}</p>
-                      <p>Score: {user.score}</p>
-                      <p>Flagged: {user.flagged ? "Yes" : "No"}</p>
+                      <div className="grid grid-cols-2 gap-3 pt-2">
+                        <div className="bg-[#262626] px-4 py-3 rounded-lg">
+                          <p className="text-xs text-gray-400">Total Attempts</p>
+                          <p className="text-lg font-bold">{user.attempts}</p>
+                        </div>
+                        <div className="bg-[#262626] px-4 py-3 rounded-lg">
+                          <p className="text-xs text-gray-400">Warned Attempts</p>
+                          <p className="text-lg font-bold text-yellow-300">
+                            {user.warnedAttempts}
+                          </p>
+                        </div>
+                        <div className="bg-[#262626] px-4 py-3 rounded-lg">
+                          <p className="text-xs text-gray-400">Score</p>
+                          <p className="text-lg font-bold">{user.score}</p>
+                        </div>
+                        <div className="bg-[#262626] px-4 py-3 rounded-lg">
+                          <p className="text-xs text-gray-400">Flagged</p>
+                          <p className="text-lg font-bold">
+                            {user.flagged ? "Yes" : "No"}
+                          </p>
+                        </div>
+                      </div>
                     </motion.div>
                   )}
                 </AnimatePresence>
