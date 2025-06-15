@@ -6,6 +6,13 @@ from PIL import Image
 import numpy as np
 import easyocr
 import io
+from langdetect import detect
+import google.generativeai as genai
+from dotenv import load_dotenv
+load_dotenv()
+import os
+
+genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
 
 
 from .redaction import (
@@ -62,6 +69,26 @@ class RedactionAPIView(APIView):
 
         try:
             reset_metrics()  # Reset before each inference
+
+            if(detect(text) == 'hi'):
+                print("Yes!")
+                model = genai.GenerativeModel('gemini-2.0-flash-lite')
+                response = model.generate_content(f"The following text is in hindi can u redact all the personal info such as api key, phone number, bank details, password,etc and giveback only the redacted sentence: {text}").text.strip()
+                metrics = get_metrics()
+                return Response({
+                    "type": "hindi",
+                    "result": response,
+                    "metrics": metrics
+                })
+            elif(detect(text) == 'te'):
+                model = genai.GenerativeModel('gemini-2.0-flash-lite')
+                response = model.generate_content(f"The following text is in telugu can u redact all the personal info such as api key, phone number, bank details, password,etc and giveback only the redacted sentence: {text}").text.strip()
+                metrics = get_metrics()
+                return Response({
+                    "type": "code",
+                    "result": response,
+                    "metrics": metrics
+                })
 
             if is_code_transformer(text, classifier):
                 pseudocode = codetransform(text)
