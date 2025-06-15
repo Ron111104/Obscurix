@@ -1,6 +1,6 @@
 import { useState } from "react";
 import axios from "axios";
-
+import Link from "next/link";
 // Reuse animated background from login
 const AnimatedStars = () => {
   const stars = Array.from({ length: 600 }, (_, i) => ({
@@ -74,8 +74,13 @@ export default function OCRPage() {
       <AnimatedStars />
 
       <nav className="relative z-10 flex items-center justify-between px-8 py-6">
-        <div className="text-2xl font-bold text-purple-400">Obscurix OCR</div>
-      </nav>
+  <div className="text-2xl font-bold text-purple-400">
+    <Link href="/">
+      Obscurix
+    </Link>{' '}
+    OCR
+  </div>
+</nav>
 
       <div className="relative z-10 flex items-center justify-center min-h-[calc(100vh-120px)] px-6">
         <div className="w-full max-w-xl">

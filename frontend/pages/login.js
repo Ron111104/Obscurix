@@ -50,6 +50,7 @@ export default function Login() {
 
       if (res.ok) {
         // Store user data in memory instead of localStorage/sessionStorage
+        localStorage.setItem("user", JSON.stringify(data.user));
         window.location.href = "/";
       } else {
         alert(data.message || "Login failed.");
