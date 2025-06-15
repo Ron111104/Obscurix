@@ -1,4 +1,5 @@
 import { useState } from "react";
+import Link from "next/link";
 
 // Animated stars component
 const AnimatedStars = () => {
@@ -66,11 +67,15 @@ export default function Login() {
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-violet-800 relative overflow-hidden">
       {/* Animated background stars */}
       <AnimatedStars />
-      
+
       {/* Navigation bar */}
       <nav className="relative z-10 flex items-center justify-between px-8 py-6">
-        <div className="text-2xl font-bold">
-          <span className="text-purple-400">Obscurix</span>
+        <div className="text-xl font-bold">
+          <Link href="/">
+            <span className="text-purple-400 text-3xl cursor-pointer">
+              Obscurix
+            </span>
+          </Link>
         </div>
       </nav>
 
@@ -99,13 +104,15 @@ export default function Login() {
                   required
                 />
               </div>
-              
+
               <div>
                 <input
                   type="password"
                   placeholder="Password"
                   value={form.password}
-                  onChange={(e) => setForm({ ...form, password: e.target.value })}
+                  onChange={(e) =>
+                    setForm({ ...form, password: e.target.value })
+                  }
                   className="w-full px-6 py-4 bg-white/5 border border-white/20 rounded-xl text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent backdrop-blur-sm transition-all"
                   required
                 />
@@ -130,14 +137,20 @@ export default function Login() {
             <div className="mt-8 text-center">
               <p className="text-white/60">
                 Don't have an account?{" "}
-                <a href="/signup" className="text-purple-400 hover:text-purple-300 font-semibold transition-colors">
+                <a
+                  href="/signup"
+                  className="text-purple-400 hover:text-purple-300 font-semibold transition-colors"
+                >
                   Create Account
                 </a>
               </p>
             </div>
 
             <div className="mt-6 text-center">
-              <a href="#" className="text-white/50 hover:text-white/70 text-sm transition-colors">
+              <a
+                href="#"
+                className="text-white/50 hover:text-white/70 text-sm transition-colors"
+              >
                 Forgot your password?
               </a>
             </div>
@@ -146,7 +159,8 @@ export default function Login() {
           {/* Additional info */}
           <div className="text-center mt-8">
             <p className="text-white/60 text-sm">
-              Secure login powered by <span className="text-purple-400">GenAI</span> obfuscation
+              Secure login powered by{" "}
+              <span className="text-purple-400">GenAI</span> obfuscation
             </p>
           </div>
         </div>
