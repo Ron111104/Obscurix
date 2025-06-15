@@ -5,7 +5,7 @@ const { extractApiKey } = require("./extractApiKey");
 const { hideApiKey } = require("./hideApiKey");
 // This method is called when your extension is activated
 // Your extension is activated the very first time the command is executed
-
+// Extension Parse Initiated
 /**
  * @param {vscode.ExtensionContext} context
  */
