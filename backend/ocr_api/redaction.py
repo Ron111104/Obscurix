@@ -72,15 +72,15 @@ def mask_personal_info(text):
     masked_text = text
     masked_names = set()
     masked_places = set()
-    masked_org = set()
+    # masked_org = set()
 
     for ent in doc.ents:
         if ent.label_ == "PERSON":
             masked_names.add(ent.text)
         elif ent.label_ == "GPE":
             masked_places.add(ent.text)
-        elif ent.label_ == "ORG":   
-            masked_org.add(ent.text)
+        # elif ent.label_ == "ORG":   
+        #     masked_org.add(ent.text)
 
     # Avoid overwriting already masked sensitive data
     for entity in masked_names:
@@ -91,8 +91,8 @@ def mask_personal_info(text):
     for entity in masked_places:
         masked_text = re.sub(rf'\b{re.escape(entity)}\b', "[Place]", masked_text)
     
-    for entity in masked_org:
-        masked_text = re.sub(rf'\b{re.escape(entity)}\b', "[Organization]", masked_text)
+    # for entity in masked_org:
+    #     masked_text = re.sub(rf'\b{re.escape(entity)}\b', "[Organization]", masked_text)
 
     return masked_text
 
@@ -174,12 +174,12 @@ def filter_text_updated(text, mode="strict"):
     """Filters text based on different modes"""
     creative_mode = (mode == "creative")
     original_text = text
+    text = censor_personal_info(text)
     text = censor_profanity(text)
     text = detect_password(text)
     text = detect_pin(text)
     text = detect_api_key(text)
     text = detect_bank_info(text)
-    text = censor_personal_info(text)
     text = mask_personal_info(text)  
 
     softened_text = text.replace("hate", "dislike").replace("angry", "frustrated")
