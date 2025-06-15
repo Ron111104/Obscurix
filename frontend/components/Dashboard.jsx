@@ -30,7 +30,7 @@ export default function DashboardPage() {
     const ctx = canvas.getContext("2d");
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
-    const letters = "アァイィウヴエエェオカキクケコサシスセソ...";
+    const letters = "アァイィウヴエエェオカキクケコサシスセソタチツテトナニヌネノハバパヒビピフブプヘベペホボポマミムメモヤユヨラリルレロワヲン";
     const fontSize = 14;
     const columns = canvas.width / fontSize;
     const drops = Array.from({ length: columns }).fill(1);
@@ -54,58 +54,19 @@ export default function DashboardPage() {
   }, []);
 
   useEffect(() => {
-    setUserStats([
-      {
-        username: "Syed Omar Albeez",
-        attempts: 12,
-        warnedAttempts: 3,
-        score: 90,
-        flagged: false,
-        timestamp: new Date().toISOString(),
-      },
-      {
-        username: "Ronak Chordia",
-        attempts: 5,
-        warnedAttempts: 1,
-        score: 31,
-        flagged: true,
-        timestamp: new Date().toISOString(),
-      },
-      {
-        username: "Mohamed Nabeel",
-        attempts: 9,
-        warnedAttempts: 2,
-        score: 78,
-        flagged: false,
-        timestamp: new Date().toISOString(),
-      },
-      {
-        username: "Faiz Abid",
-        attempts: 14,
-        warnedAttempts: 6,
-        score: 45,
-        flagged: true,
-        timestamp: new Date().toISOString(),
-      },
-      {
-        username: "Rohan Kumar",
-        attempts: 7,
-        warnedAttempts: 0,
-        score: 85,
-        flagged: false,
-        timestamp: new Date().toISOString(),
-      },
-      {
-        username: "Kecil C",
-        attempts: 11,
-        warnedAttempts: 4,
-        score: 29,
-        flagged: true,
-        timestamp: new Date().toISOString(),
-      },
-    ]);
+    const fetchStats = async () => {
+      try {
+        const res = await fetch("/api/metrics");
+        const data = await res.json();
+        setUserStats(data.users);
+      } catch (error) {
+        console.error("Error fetching user stats:", error);
+      }
+    };
+
+    fetchStats();
   }, []);
-  
+
   const toggleAccordion = (index) => {
     setOpenIndex((prev) => (prev === index ? null : index));
   };
@@ -140,6 +101,28 @@ export default function DashboardPage() {
     );
   };
 
+  const calculatePrivacyScore = (metrics) => {
+    const weights = {
+      api_keys: 3,
+      bank_accounts: 1.5,
+      card_numbers: 1.5,
+      passwords: 1,
+      pins: 1,
+      emails: 0.5,
+      phone_numbers: 0.5,
+      profane: 0.5,
+    };
+
+    let rawScore = 0;
+    for (const key in weights) {
+      const val = metrics[key] || 0;
+      rawScore += val * weights[key];
+    }
+
+    const normalized = Math.max(0, 100 - Math.min(rawScore, 100));
+    return Math.round(normalized);
+  };
+
   return (
     <>
       <Navbar />
@@ -157,67 +140,75 @@ export default function DashboardPage() {
           </h1>
 
           <div className="flex flex-col gap-6">
-            {userStats.map((user, idx) => (
-              <div
-                key={idx}
-                className="rounded-xl border border-[#2c2c2c] bg-[#181818] hover:shadow-lg transition-shadow"
-              >
-                <button
-                  onClick={() => toggleAccordion(idx)}
-                  className="w-full flex justify-between items-center px-6 py-5"
-                >
-                  <div className="flex items-center gap-4">
-                    <UserCircle className="w-9 h-9 text-[#b183f5]" />
-                    <div>
-                      <p className="text-lg font-semibold">{user.username}</p>
-                      <p className="text-xs text-gray-400">
-                        {new Date(user.timestamp).toLocaleString()}
-                      </p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    {getStatusBadge(user.flagged)}
-                    {getScoreBadge(user.score)}
-                    {openIndex === idx ? <ChevronUp /> : <ChevronDown />}
-                  </div>
-                </button>
+            {userStats.map((user, idx) => {
+              const metrics = user.metrics || {};
+              const warnedAttempts = user.warningAttempts ?? 0;
+              const totalAttempts = user.totalAttempts ?? 0;
+              const score = calculatePrivacyScore(metrics);
+              const flagged = score < 50;
 
-                <AnimatePresence>
-                  {openIndex === idx && (
-                    <motion.div
-                      initial={{ height: 0, opacity: 0 }}
-                      animate={{ height: "auto", opacity: 1 }}
-                      exit={{ height: 0, opacity: 0 }}
-                      transition={{ duration: 0.3 }}
-                      className="px-6 pb-5 text-sm text-gray-300 overflow-hidden"
-                    >
-                      <div className="grid grid-cols-2 gap-3 pt-2">
-                        <div className="bg-[#262626] px-4 py-3 rounded-lg">
-                          <p className="text-xs text-gray-400">Total Attempts</p>
-                          <p className="text-lg font-bold">{user.attempts}</p>
-                        </div>
-                        <div className="bg-[#262626] px-4 py-3 rounded-lg">
-                          <p className="text-xs text-gray-400">Warned Attempts</p>
-                          <p className="text-lg font-bold text-yellow-300">
-                            {user.warnedAttempts}
-                          </p>
-                        </div>
-                        <div className="bg-[#262626] px-4 py-3 rounded-lg">
-                          <p className="text-xs text-gray-400">Score</p>
-                          <p className="text-lg font-bold">{user.score}</p>
-                        </div>
-                        <div className="bg-[#262626] px-4 py-3 rounded-lg">
-                          <p className="text-xs text-gray-400">Flagged</p>
-                          <p className="text-lg font-bold">
-                            {user.flagged ? "Yes" : "No"}
-                          </p>
-                        </div>
+              return (
+                <div
+                  key={idx}
+                  className="rounded-xl border border-[#2c2c2c] bg-[#181818] hover:shadow-lg transition-shadow"
+                >
+                  <button
+                    onClick={() => toggleAccordion(idx)}
+                    className="w-full flex justify-between items-center px-6 py-5"
+                  >
+                    <div className="flex items-center gap-4">
+                      <UserCircle className="w-9 h-9 text-[#b183f5]" />
+                      <div>
+                        <p className="text-lg font-semibold">{user.email}</p>
+                        <p className="text-xs text-gray-400">
+                          {new Date(user.timestamp).toLocaleString()}
+                        </p>
                       </div>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </div>
-            ))}
+                    </div>
+                    <div className="flex items-center gap-3">
+                      {getStatusBadge(flagged)}
+                      {getScoreBadge(score)}
+                      {openIndex === idx ? <ChevronUp /> : <ChevronDown />}
+                    </div>
+                  </button>
+
+                  <AnimatePresence>
+                    {openIndex === idx && (
+                      <motion.div
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: "auto", opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        transition={{ duration: 0.3 }}
+                        className="px-6 pb-5 text-sm text-gray-300 overflow-hidden"
+                      >
+                        <div className="grid grid-cols-2 gap-3 pt-2">
+                          <div className="bg-[#262626] px-4 py-3 rounded-lg">
+                            <p className="text-xs text-gray-400">Total Attempts</p>
+                            <p className="text-lg font-bold">{totalAttempts}</p>
+                          </div>
+                          <div className="bg-[#262626] px-4 py-3 rounded-lg">
+                            <p className="text-xs text-gray-400">Warned Attempts</p>
+                            <p className="text-lg font-bold text-yellow-300">
+                              {warnedAttempts}
+                            </p>
+                          </div>
+                          <div className="bg-[#262626] px-4 py-3 rounded-lg">
+                            <p className="text-xs text-gray-400">Score</p>
+                            <p className="text-lg font-bold">{score}</p>
+                          </div>
+                          <div className="bg-[#262626] px-4 py-3 rounded-lg">
+                            <p className="text-xs text-gray-400">Flagged</p>
+                            <p className="text-lg font-bold">
+                              {flagged ? "Yes" : "No"}
+                            </p>
+                          </div>
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+              );
+            })}
           </div>
         </motion.main>
       </div>
