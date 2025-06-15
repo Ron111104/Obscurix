@@ -1,5 +1,5 @@
 "use client";
-
+import Link from "next/link";
 import { motion } from "framer-motion";
 import StarsBG from "./StarsBG";
 
@@ -57,9 +57,11 @@ export default function Hero() {
           transition={{ delay: 0.3, duration: 0.6 }}
           className="flex justify-center space-x-4 mt-8"
         >
-          <button className="px-6 py-3 bg-[#7e30e1] text-white rounded-xl shadow-lg hover:bg-[#9e51ff] transition-all duration-300">
-            Try it Now
-          </button>
+          <Link href="/redactify">
+    <button className="px-6 py-3 bg-[#7e30e1] text-white rounded-xl shadow-lg hover:bg-[#9e51ff] transition-all duration-300">
+      Try it Now
+    </button>
+  </Link>
           <button
             onClick={scrollToNews}
             className="px-6 py-3 border border-[#7e30e1] text-[#7e30e1] rounded-xl hover:bg-[#1a1a1a] transition-all duration-300"
