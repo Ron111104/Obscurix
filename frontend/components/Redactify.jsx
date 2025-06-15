@@ -5,13 +5,30 @@ import { SendHorizonal, Menu } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
 import Link from "next/link";
 
-const mockResponse = (input) => {
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      resolve(`Echoing back: <strong>${input}</strong>`);
-    }, 800);
+const backendUrl =
+  process.env.NODE_ENV === "development"
+    ? process.env.NEXT_PUBLIC_BACKEND_URL_DEV
+    : process.env.NEXT_PUBLIC_BACKEND_URL_PROD;
+
+const redactText = async (input) => {
+  const user = JSON.parse(localStorage.getItem("user"));
+  const email = user?.email;
+
+  const res = await fetch("/api/redact", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      text: input,
+      mode: "strict",
+      email: email, // ⬅️ added here
+    }),
   });
+
+  if (!res.ok) throw new Error("Failed to fetch redacted response");
+  const data = await res.json();
+  return data.outputs;
 };
+
 
 export default function RedactifyPage() {
   const [input, setInput] = useState("");
@@ -31,13 +48,48 @@ export default function RedactifyPage() {
     const timestamp = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
 
     const userMessage = { sender: "user", text: input, time: timestamp };
-    const botText = await mockResponse(input);
-    const botMessage = { sender: "bot", text: botText, time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) };
-
-    const updatedSession = [...currentSession, userMessage, botMessage];
-    setCurrentSession(updatedSession);
-    setChat(updatedSession);
+    setChat((prev) => [...prev, userMessage]);
+    setCurrentSession((prev) => [...prev, userMessage]);
     setInput("");
+
+    try {
+      const outputs = await redactText(input);
+      const botOptions = {
+        sender: "bot",
+        type: "options",
+        options: outputs,
+        time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+      };
+      setChat((prev) => [...prev, botOptions]);
+      setCurrentSession((prev) => [...prev, botOptions]);
+    } catch (err) {
+      console.error(err);
+      const errorMessage = {
+        sender: "bot",
+        text: "⚠️ Failed to process. Please try again.",
+        time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+      };
+      setChat((prev) => [...prev, errorMessage]);
+      setCurrentSession((prev) => [...prev, errorMessage]);
+    }
+  };
+
+  const handleOptionSelect = (selectedText, time) => {
+    const botMessage = {
+      sender: "bot",
+      text: selectedText,
+      time,
+    };
+
+    setChat((prev) => {
+      const newChat = [...prev.filter((m) => m.type !== "options"), botMessage];
+      return newChat;
+    });
+
+    setCurrentSession((prev) => {
+      const newSession = [...prev.filter((m) => m.type !== "options"), botMessage];
+      return newSession;
+    });
   };
 
   const handleNewChat = () => {
@@ -114,22 +166,43 @@ export default function RedactifyPage() {
           ref={chatBoxRef}
           className="flex-1 overflow-y-auto px-6 py-6 space-y-4 bg-[#0f0f1a]"
         >
-          {chat.map((msg, i) => (
-            <motion.div
-              key={i}
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.3 }}
-              className={`max-w-[80%] px-5 py-4 rounded-xl text-lg leading-relaxed whitespace-pre-wrap flex flex-col ${
-                msg.sender === "user"
-                  ? "ml-auto bg-[#7e30e1]/20 items-end text-right"
-                  : "mr-auto bg-[#32214c]/40 items-start text-left"
-              }`}
-            >
-              <div dangerouslySetInnerHTML={{ __html: msg.text }} />
-              <div className="text-xs text-gray-400 mt-1">{msg.time}</div>
-            </motion.div>
-          ))}
+          {chat.map((msg, i) => {
+            if (msg.type === "options") {
+              return (
+                <div key={i} className="flex flex-col gap-2">
+                  {msg.options.map((opt, idx) => (
+                    <motion.div
+                      key={idx}
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.3 }}
+                      onClick={() => handleOptionSelect(opt, msg.time)}
+                      className="cursor-pointer max-w-[80%] px-5 py-4 rounded-xl text-lg leading-relaxed bg-[#32214c]/40 text-white hover:bg-[#7e30e1]/30 transition-all"
+                    >
+                      <div dangerouslySetInnerHTML={{ __html: opt }} />
+                    </motion.div>
+                  ))}
+                </div>
+              );
+            }
+
+            return (
+              <motion.div
+                key={i}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3 }}
+                className={`max-w-[80%] px-5 py-4 rounded-xl text-lg leading-relaxed whitespace-pre-wrap flex flex-col ${
+                  msg.sender === "user"
+                    ? "ml-auto bg-[#7e30e1]/20 items-end text-right"
+                    : "mr-auto bg-[#32214c]/40 items-start text-left"
+                }`}
+              >
+                <div dangerouslySetInnerHTML={{ __html: msg.text }} />
+                <div className="text-xs text-gray-400 mt-1">{msg.time}</div>
+              </motion.div>
+            );
+          })}
         </div>
 
         {/* Input */}
