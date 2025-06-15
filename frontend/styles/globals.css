@@ -71,10 +71,20 @@ body {
   }
 }
 
-.animation-scroll-news {
-  animation: scroll-news 20s linear infinite;
+@keyframes scrollY {
+  0% {
+    transform: translateY(0%);
+  }
+
+  100% {
+    transform: translateY(-50%);
+  }
 }
 
-.animation-scroll-news:hover {
+.animation-scroll-news {
+  animation: scrollY 25s linear infinite;
+}
+
+.group:hover .animation-scroll-news {
   animation-play-state: paused;
 }
