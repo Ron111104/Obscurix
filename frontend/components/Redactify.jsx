@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useRef } from "react";
-import { SendHorizonal, Menu, X } from "lucide-react";
+import { SendHorizonal, Menu, X, Sparkles } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -11,14 +11,14 @@ const backendUrl =
     ? process.env.NEXT_PUBLIC_BACKEND_URL_DEV
     : process.env.NEXT_PUBLIC_BACKEND_URL_PROD;
 
-const redactText = async (input) => {
+const redactText = async (input, mode) => {
   const user = JSON.parse(localStorage.getItem("user"));
   const email = user?.email;
 
   const res = await fetch("/api/redact", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ text: input, mode: "strict", email }),
+    body: JSON.stringify({ text: input, mode, email }),
   });
 
   if (!res.ok) throw new Error("Failed to fetch redacted response");
@@ -33,6 +33,7 @@ export default function RedactifyPage() {
   const [currentSession, setCurrentSession] = useState([]);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [hasMounted, setHasMounted] = useState(false);
+  const [mode, setMode] = useState("strict");
   const chatBoxRef = useRef(null);
   const router = useRouter();
 
@@ -52,7 +53,7 @@ export default function RedactifyPage() {
     setInput("");
 
     try {
-      const outputs = await redactText(input);
+      const outputs = await redactText(input, mode);
       const botOptions = {
         sender: "bot",
         type: "options",
@@ -97,6 +98,20 @@ export default function RedactifyPage() {
 
   return (
     <div className="min-h-screen flex text-white font-geist text-lg relative">
+      {/* Mode Toggle */}
+      <div className="fixed bottom-6 left-4 z-50">
+        <div className="flex items-center gap-2 bg-[#1e153a] border border-[#32214c] px-4 py-2 rounded-full shadow-lg">
+          <span className="text-sm text-[#ccc]">Mode:</span>
+          <button
+            onClick={() => setMode((prev) => (prev === "strict" ? "creative" : "strict"))}
+            className={`px-3 py-1 rounded-full text-sm font-semibold transition-all duration-300 flex items-center gap-1 ${
+              mode === "strict" ? "bg-[#7e30e1] text-white" : "bg-[#b364ff] text-black"
+            }`}
+          >
+            <Sparkles className="w-4 h-4" /> {mode.charAt(0).toUpperCase() + mode.slice(1)}
+          </button>
+        </div>
+        </div>
       {/* Mobile Sidebar */}
       <AnimatePresence>
         {sidebarOpen && (
@@ -181,19 +196,17 @@ export default function RedactifyPage() {
             if (msg.type === "options") {
               return (
                 <div key={i} className="flex flex-col gap-2">
-                  {msg.options.map((opt, idx) => (
-                    <motion.div
-                      key={idx}
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ duration: 0.3 }}
-                      onClick={() => handleOptionSelect(opt, msg.time)}
-                      className="cursor-pointer max-w-[80%] px-5 py-4 rounded-xl text-lg leading-relaxed bg-[#32214c]/40 text-white hover:bg-[#7e30e1]/30 transition-all"
-                    >
-                      <div dangerouslySetInnerHTML={{ __html: opt }} />
-                      <div className="text-xs text-gray-400 mt-1">{msg.time}</div>
-                    </motion.div>
-                  ))}
+                  {msg.options && Array.isArray(msg.options) && msg.options.map((opt, idx) => (
+  <motion.div
+    key={idx}
+    initial={{ opacity: 0, y: 10 }}
+    animate={{ opacity: 1, y: 0 }}
+    transition={{ duration: 0.3 }}
+    className="bg-[#2d2b45] text-white p-4 rounded-lg border border-[#32214c]"
+  >
+    {opt}
+  </motion.div>
+))}
                 </div>
               );
             }

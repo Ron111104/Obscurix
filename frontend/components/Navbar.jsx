@@ -70,7 +70,7 @@ export default function Navbar() {
     "hover:text-[#b364ff] transition duration-300 text-base md:text-lg";
 
   return (
-    <div className="w-full fixed top-0 z-50 font-geist mt-4 px-6">
+    <div className="w-full fixed top-2 z-50 font-geist mt-4 px-6">
       {/* Desktop Navbar */}
       <div className="hidden md:flex relative items-center justify-between max-w-7xl mx-auto">
         <div className="flex-shrink-0">
