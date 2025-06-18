@@ -1,7 +1,4 @@
-Here's your professionally refined and icon-free version of the **Obscurix - Comprehensive Technical Documentation**:
-
 ---
-
 # Obscurix - Comprehensive Technical Documentation
 
 **Secure Communication & Redaction Platform with Generative AI, OCR, and PII Intelligence**
