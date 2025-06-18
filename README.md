@@ -1,4 +1,3 @@
----
 # Obscurix - Comprehensive Technical Documentation
 
 **Secure Communication & Redaction Platform with Generative AI, OCR, and PII Intelligence**
