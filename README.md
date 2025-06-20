@@ -7,22 +7,23 @@
 ## Table of Contents
 
 1. [Project Overview](#project-overview)
-2. [Architecture & Tech Stack](#architecture--tech-stack)
-3. [Frontend Structure](#frontend-structure)
-4. [API Endpoints](#api-endpoints)
-5. [Component Architecture](#component-architecture)
-6. [Authentication & User Management](#authentication--user-management)
-7. [Core Features](#core-features)
+2. [Features](#features)
+3. [Architecture & Tech Stack](#architecture--tech-stack)
+4. [Frontend Structure](#frontend-structure)
+5. [API Endpoints](#api-endpoints)
+6. [Component Architecture](#component-architecture)
+7. [Authentication & User Management](#authentication--user-management)
 8. [Data Flow & Integration](#data-flow--integration)
 9. [Deployment & CI/CD](#deployment--cicd)
 10. [Security Implementation](#security-implementation)
 11. [Development Guidelines](#development-guidelines)
+12. [Run Locally](#how-to-run-locally)
 
 ---
 
 ## Project Overview
 
-**Obscurix** is a secure content redaction and moderation platform designed for teams and enterprises to communicate and collaborate safely. By leveraging Generative AI, Optical Character Recognition (OCR), and advanced PII detection techniques, Obscurix ensures sensitive data is automatically detected, redacted, or rewritten before exposure.
+**Obscurix** is a next-generation data redaction and content moderation platform designed to help teams and enterprises securely communicate and collaborate without risking sensitive data exposure. The chatbot interface, **Redactify**, enables users to interact naturally while ensuring compliance, privacy, and safety—powered by Generative AI and real-time monitoring. Optical Character Recognition (OCR), and advanced PII detection techniques, Obscurix ensures sensitive data is automatically detected, redacted, or rewritten before exposure.
 
 ### Key Objectives
 
@@ -30,6 +31,23 @@
 * **AI-Powered Rewriting**: Transformation of sensitive content while preserving meaning and context.
 * **Compliance Monitoring**: Real-time risk analysis via a centralized dashboard.
 * **Secure Collaboration**: Converts source code into readable pseudocode, protecting intellectual property.
+
+---
+##  Features
+
+| **Feature**                                | **Description** |
+|--------------------------------------------|-----------------|
+| **PII Redaction Engine**                   | Real-time masking of sensitive data such as emails, phone numbers, passwords, API keys, card numbers, and bank account details using regex and NLP. |
+| **Generative AI Rewriting**                | Uses Google Gemini to rewrite redacted content while preserving the original context and softening tone, especially in sensitive or negative sentiment messages. |
+| **Admin Monitoring Dashboard**             | Displays analytics for flagged content, user behavior trends, and PII redaction frequency in real time. |
+| **Multilingual Redaction Support**         | Redaction and rewriting supported for English, Hindi, and Spanish using spaCy’s NER and GenAI’s language-agnostic capabilities. |
+| **Dual-Mode Redaction (Strict & Creative)**| Strict mode performs full redaction; Creative mode redacts and then rephrases the content while maintaining meaning. |
+| **Leak Prevention Browser Extension**      | Chrome/Edge extension that uses OCR and NLP to detect and block screenshots or copied code/text containing sensitive info before it is posted to social media. |
+| **Code Sanitization & Pseudocode Conversion** | Automatically converts code to anonymized pseudocode to ensure safe collaboration without exposing internal logic or credentials. |
+| **Sentiment-Aware Moderation**             | Detects and softens toxic or harmful language, ensuring that content is emotionally neutral or constructive. |
+| **Cognitive Code Obfuscation via GenAI**   | Converts flagged code into obfuscated pseudocode while explaining the logic, allowing safe public sharing (e.g., StackOverflow). |
+| **Sensitivity Scoring System**             | Assigns a numeric risk score (0–100) to messages based on redacted content and sentiment, enabling proactive flagging. |
+| **Audit Trail & Reporting Dashboard**      | Tracks redaction activity, sentiment trends, and high-risk users or teams; helps enterprises monitor compliance. |
 
 ---
 
@@ -55,14 +73,15 @@
 | spaCy                 | Named Entity Recognition      |
 | Google Gemini API     | Generative AI Engine          |
 | EasyOCR               | OCR for Image Text Extraction |
+| CI/CD                 | GitHub Actions + AWS EC2      |
 
 ### Database & Storage
 
-| Technology    | Purpose                        |
-| ------------- | ------------------------------ |
-| MongoDB Atlas | Authentication, Session & Logs |
-| SQLite        | Temporary Session Storage      |
-| Local Storage | Client-side State Management   |
+| Technology    | Purpose                                |
+| ------------- | -------------------------------------- |
+| MongoDB Atlas | Authentication, Session & Logs         |
+| Local Storage | Client-side State Management           |
+| Extensions    | Custom Chrome/Edge extension using OCR |
 
 ---
 
@@ -182,43 +201,6 @@ frontend/
 | ----- | ------------------------------------- |
 | User  | Redactify, OCR, Profile               |
 | Admin | Full access including Dashboard views |
-
----
-
-## Core Features
-
-1. **PII Redaction Engine**
-
-   * Uses spaCy, regex, and heuristic rules for redaction of emails, phone numbers, API keys, bank details, SSNs, and passwords.
-
-2. **Generative AI Rewriting**
-
-   * Strict Mode: Masks sensitive data.
-   * Creative Mode: Rewrites content using Gemini API.
-
-3. **OCR Processing**
-
-   * Supports image input and screenshot-based text extraction.
-
-4. **Code Obfuscation & Pseudocode Conversion**
-
-   * Converts input code into generalized logic with comments.
-
-5. **Browser Extension Protection**
-
-   * Prevents copy, screenshot, and clipboard leakage.
-
-6. **Sentiment Filtering**
-
-   * Detects and rewrites toxic or harmful content.
-
-7. **Sensitivity Scoring**
-
-   * Calculates a risk score based on detected PII, sentiment, and profanity.
-
-8. **Admin Analytics Dashboard**
-
-   * Real-time metrics including daily redactions, user behavior, and historical trends.
 
 ---
 
@@ -347,3 +329,17 @@ jobs:
 * **Performance Testing**: Simulated load for critical endpoints.
 
 ---
+##  How to Run Locally
+
+```bash
+# Frontend
+cd frontend
+npm install
+npm run dev
+
+# Backend
+cd backend
+venv/Scripts/activate 
+pip install -r requirements.txt
+python manage.py runserver
+```
